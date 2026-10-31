@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080b16"><title>CryptoSearch</title>
+<style>
+:root{color-scheme:dark;--bg:#080b16;--panel:#11182a;--line:#26334c;--green:#38f58a;--muted:#91a0b8;--purple:#7c4dff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#142a67 0,#080b16 55%);font:15px -apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;color:#eef4ff;padding:20px 14px 40px}
+main{max-width:720px;margin:auto}.top{display:flex;align-items:center;gap:12px;margin:10px 0 22px}.logo{width:44px;height:44px;border-radius:14px;background:linear-gradient(135deg,#00d5ff,#6444ff);display:grid;place-items:center;font-size:24px;font-weight:900}.sub{color:var(--muted);font-size:12px;margin-top:3px}
+h1{font-size:22px;margin:0}.panel{background:linear-gradient(160deg,#151e33,#0d1323);border:1px solid var(--line);border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 10px 35px #0005}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.grow{flex:1;min-width:180px}label{display:block;color:var(--muted);font-size:12px;margin:0 0 7px}
+input,select,textarea{width:100%;background:#080e1c;border:1px solid #2a3854;border-radius:11px;color:#f2f6ff;padding:12px;font:inherit;outline:none}textarea{min-height:105px;resize:vertical;font-family:ui-monospace,monospace;font-size:12px}
+button{border:0;border-radius:12px;padding:13px 17px;font-weight:800;font-size:14px;color:#fff;background:var(--purple);cursor:pointer}button:disabled{opacity:.45}button.secondary{background:#26334c}button.stop{background:#d52f49}.primary{background:linear-gradient(90deg,#6738ff,#a03bff)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{background:#080e1c;border:1px solid #26334c;border-radius:12px;padding:12px}.stat b{display:block;font-size:19px;color:var(--green);margin-top:5px}.stat span{font-size:11px;color:var(--muted)}
+.status{font-size:12px;color:var(--muted);margin-top:10px;min-height:18px}.result{padding:12px 0;border-bottom:1px solid #25314a}.result:last-child{border:0}.addr{font:11px ui-monospace,monospace;word-break:break-all;color:#aebbd1;margin-top:5px}.amount{color:var(--green);font-weight:800}.tag{font-size:10px;border:1px solid #34415c;border-radius:20px;padding:3px 7px;color:#c3d0e5}
+.note{font-size:12px;line-height:1.55;color:#aab7cd}.note strong{color:#fff}.tabs{display:flex;gap:8px;margin:14px 0}.tabs button{flex:1;background:#1a2540}.tabs button.active{background:#6240d9}.hide{display:none}.tiny{font-size:11px;color:var(--muted)}a{color:#86baff}
+@media(max-width:420px){.stats{grid-template-columns:1fr 1fr}.stats .stat:last-child{grid-column:span 2}}
+</style></head>
+<body><main>
+<div class="top"><div class="logo">₿</div><div><h1>CryptoSearch</h1><div class="sub">Public Blockchain Scanner · iPhone Edition</div></div><span class="tag" style="margin-left:auto">BETA</span></div>
+<div class="panel">
+ <div class="stats"><div class="stat"><span>Geprüfte Adressen</span><b id="checked">0</b></div><div class="stat"><span>Mit Guthaben</span><b id="funded">0</b></div><div class="stat"><span>Gefundener Gesamtwert</span><b id="total">—</b></div></div>
+ <div class="status" id="status">Bereit. Es werden ausschließlich öffentliche Blockchain-Daten gelesen.</div>
+</div>
+<div class="tabs"><button id="tabManual" class="active" onclick="showTab('manual')">Adressliste prüfen</button><button id="tabAuto" onclick="showTab('auto')">Auto-Scan</button></div>
+<section id="manual" class="panel">
+ <h2 style="font-size:17px;margin:0 0 12px">Wallet-Adressen überprüfen</h2>
+ <label>Blockchain</label><select id="network"><option value="BTC">Bitcoin (BTC)</option><option value="ETH">Ethereum (ETH)</option><option value="BNB">BNB Smart Chain (BNB)</option><option value="SOL">Solana (SOL)</option><option value="XRP">XRP Ledger (XRP)</option></select>
+ <div style="height:12px"></div><label>Eine Adresse pro Zeile</label><textarea id="addresses" placeholder="Wallet-Adresse hier einfügen&#10;oder mehrere Adressen untereinander"></textarea>
+ <div class="row" style="margin-top:12px"><button class="primary grow" id="checkBtn" onclick="checkList()">Adressen prüfen</button><button class="secondary" onclick="document.getElementById('addresses').value=''">Leeren</button></div>
+ <p class="tiny">Du brauchst nur öffentliche Empfangsadressen. Niemals Seed-Phrase oder Private Key eingeben.</p>
+</section>
+<section id="auto" class="panel hide">
+ <h2 style="font-size:17px;margin:0 0 8px">Automatischer Blockchain-Scan</h2>
+ <p class="note">Der Auto-Scan untersucht den jeweils neuesten Bitcoin-Block, nimmt daraus öffentlich sichtbare Empfangsadressen und prüft deren aktuellen BTC-Bestand. Das ist eine begrenzte Stichprobe – keine Suche im gesamten Bitcoin-Netzwerk.</p>
+ <div class="row"><button class="primary grow" id="startBtn" onclick="startAuto()">START SCAN</button><button class="stop" id="stopBtn" onclick="stopAuto()" disabled>STOP</button></div>
+ <div class="status" id="autoStatus">Noch nicht gestartet.</div>
+</section>
+<div class="panel">
+ <div class="row" style="justify-content:space-between"><h2 style="font-size:17px;margin:0">Scan-Ergebnisse</h2><button class="secondary" onclick="clearResults()">Löschen</button></div>
+ <div id="results" class="note" style="margin-top:10px">Noch keine Ergebnisse.</div>
+</div>
+<div class="panel note">
+ <strong>Wichtige Grenzen & Sicherheit</strong><br>
+• Die App kann keine fremden privaten Schlüssel finden und keine fremden Wallets öffnen.<br>
+• Es gibt keine vollständige öffentliche Liste aller Wallet-Adressen. Der Auto-Scan prüft nur Adressen, die in einem aktuellen Block auftauchen.<br>
+• Guthaben ist öffentlich sichtbar, aber kein Zugriff auf die Coins möglich.<br>
+• Keine Seed-Phrase, Passwörter oder Private Keys eingeben. Die App fordert diese niemals an.<br>
+• Öffentliche RPC-Dienste können Anfragen begrenzen; dann wird ein Fehler angezeigt.
+</div>
+<div class="tiny" style="text-align:center;margin:18px 0">Datenquellen: Blockstream Esplora · Ethereum JSON-RPC · Solana RPC · XRPL Public API</div>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+let running=false, checked=0, funded=0, results=[], totalNative={BTC:0,ETH:0,BNB:0,SOL:0,XRP:0};
+function showTab(which){$('manual').classList.toggle('hide',which!=='manual');$('auto').classList.toggle('hide',which!=='auto');$('tabManual').classList.toggle('active',which==='manual');$('tabAuto').classList.toggle('active',which==='auto')}
+function setStatus(s){$('status').textContent=s}
+function render(){ $('checked').textContent=checked; $('funded').textContent=funded; $('total').textContent='—'; $('results').innerHTML=results.length?results.slice().reverse().map(r=>`<div class="result"><div class="row" style="justify-content:space-between"><b>${esc(r.net)}</b><span class="amount">${esc(r.balance)} ${esc(r.net)}</span></div><div class="addr">${esc(r.address)}</div><div class="tiny">${esc(r.detail||'')}</div></div>`).join(''):'Noch keine Ergebnisse.'}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function addResult(net,address,balance,detail){checked++;let n=Number(balance);if(n>0)funded++;results.push({net,address,balance:String(balance),detail});render()}
+async function jsonrpc(url,method,params){let r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({jsonrpc:'2.0',id:1,method,params})});if(!r.ok)throw Error('RPC HTTP '+r.status);let j=await r.json();if(j.error)throw Error(j.error.message||'RPC-Fehler');return j.result}
+async function balance(net,address){
+ if(net==='BTC'){let r=await fetch('https://blockstream.info/api/address/'+encodeURIComponent(address));if(!r.ok)throw Error('Bitcoin API HTTP '+r.status);let j=await r.json();let sats=(j.chain_stats.funded_txo_sum-j.chain_stats.spent_txo_sum)+(j.mempool_stats.funded_txo_sum-j.mempool_stats.spent_txo_sum);return (sats/1e8).toFixed(8)}
+ if(net==='ETH'||net==='BNB'){let url=net==='ETH'?'https://ethereum-rpc.publicnode.com':'https://bsc-dataseed.binance.org/';let hex=await jsonrpc(url,'eth_getBalance',[address,'latest']);return (Number(BigInt(hex))/1e18).toFixed(8)}
+ if(net==='SOL'){let r=await jsonrpc('https://api.mainnet-beta.solana.com','getBalance',[address,{commitment:'confirmed'}]);return (r.value/1e9).toFixed(8)}
+ if(net==='XRP'){let r=await fetch('https://xrplcluster.com/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:'account_info',params:[{account:address,ledger_index:'validated'}]})});let j=await r.json();if(j.result?.error==='actNotFound')return '0';if(j.result?.error)throw Error(j.result.error_message||j.result.error);return (Number(j.result.account_data.Balance)/1e6).toFixed(6)}
+ throw Error('Netzwerk nicht unterstützt')
+}
+function valid(net,a){if(net==='BTC')return /^(bc1|[13])[a-zA-HJ-NP-Z0-9]{20,90}$/.test(a);if(net==='ETH'||net==='BNB')return /^0x[a-fA-F0-9]{40}$/.test(a);if(net==='SOL')return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(a);if(net==='XRP')return /^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(a);return false}
+async function checkOne(net,a){if(!valid(net,a)){addResult(net,a,'UNGÜLTIG','Adressformat passt nicht zum ausgewählten Netzwerk.');return}try{let b=await balance(net,a);addResult(net,a,b,'Aktueller öffentlicher Kontostand');}catch(e){addResult(net,a,'FEHLER',e.message)}}
+async function checkList(){let net=$('network').value,arr=[...new Set($('addresses').value.split(/\s+/).map(x=>x.trim()).filter(Boolean))];if(!arr.length){setStatus('Bitte mindestens eine öffentliche Adresse einfügen.');return} $('checkBtn').disabled=true;for(let i=0;i<arr.length;i++){setStatus(`Prüfe ${i+1} von ${arr.length} …`);await checkOne(net,arr[i])} $('checkBtn').disabled=false;setStatus('Adressprüfung abgeschlossen.')}
+async function discoverBlock(){let h=await (await fetch('https://blockstream.info/api/blocks/tip/height')).text();let hash=await (await fetch('https://blockstream.info/api/block-height/'+h)).text();let txs=await (await fetch('https://blockstream.info/api/block/'+hash+'/txs')).json();let set=new Set();for(let tx of txs)for(let o of (tx.vout||[]))if(o.scriptpubkey_address)set.add(o.scriptpubkey_address);return [...set].slice(0,25)}
+async function startAuto(){if(running)return;running=true;$('startBtn').disabled=true;$('stopBtn').disabled=false;showTab('auto');let rounds=0;while(running&&rounds<100){try{$('autoStatus').textContent='Lese neuesten Bitcoin-Block …';let list=await discoverBlock();$('autoStatus').textContent=`Block-Stichprobe: ${list.length} Adressen werden geprüft …`;for(let i=0;i<list.length&&running;i++){await checkOne('BTC',list[i]);$('autoStatus').textContent=`Prüfe Adresse ${i+1}/${list.length} · Runde ${rounds+1}`;await new Promise(r=>setTimeout(r,250))}rounds++;if(running)await new Promise(r=>setTimeout(r,15000))}catch(e){$('autoStatus').textContent='Scan-Fehler: '+e.message;await new Promise(r=>setTimeout(r,10000))}}running=false;$('startBtn').disabled=false;$('stopBtn').disabled=true;if(rounds>=100)$('autoStatus').textContent='Scan nach 100 Runden beendet.'}
+function stopAuto(){running=false;$('autoStatus').textContent='Stop angefordert …'}
+function clearResults(){results=[];checked=0;funded=0;render();setStatus('Ergebnisse gelöscht.')}
+</script></body></html>
