@@ -22,7 +22,7 @@ button{border:0;border-radius:12px;padding:13px 17px;font-weight:800;font-size:1
  <div class="stats"><div class="stat"><span>Geprüfte Adressen</span><b id="checked">0</b></div><div class="stat"><span>Mit Guthaben</span><b id="funded">0</b></div><div class="stat"><span>Gefundener Gesamtwert</span><b id="total">—</b></div></div>
  <div class="status" id="status">Bereit. Es werden ausschließlich öffentliche Blockchain-Daten gelesen.</div>
 </div>
-<div class="tabs"><button id="tabManual" class="active" onclick="showTab('manual')">Adressliste prüfen</button><button id="tabAuto" onclick="showTab('auto')">Auto-Scan</button></div>
+<div class="tabs"><button id="tabManual" class="active" onclick="showTab('manual')">Adressliste</button><button id="tabAuto" onclick="showTab('auto')">Auto-Scan</button><button id="tabMining" onclick="showTab('mining')">Mining</button></div>
 <section id="manual" class="panel">
  <h2 style="font-size:17px;margin:0 0 12px">Wallet-Adressen überprüfen</h2>
  <label>Blockchain</label><select id="network"><option value="BTC">Bitcoin (BTC)</option><option value="ETH">Ethereum (ETH)</option><option value="BNB">BNB Smart Chain (BNB)</option><option value="SOL">Solana (SOL)</option><option value="XRP">XRP Ledger (XRP)</option></select>
@@ -36,6 +36,56 @@ button{border:0;border-radius:12px;padding:13px 17px;font-weight:800;font-size:1
  <div class="row"><button class="primary grow" id="startBtn" onclick="startAuto()">START SCAN</button><button class="stop" id="stopBtn" onclick="stopAuto()" disabled>STOP</button></div>
  <div class="status" id="autoStatus">Noch nicht gestartet.</div>
 </section>
+
+<section id="mining" class="panel hide">
+ <div class="row" style="justify-content:space-between">
+  <h2 style="font-size:17px;margin:0">Mining-Center</h2>
+  <span class="tag">PLANUNG</span>
+ </div>
+ <p class="note" style="margin-top:10px">Hier kannst du echte Mining-Kosten und mögliche Einnahmen prüfen. Wichtig: Diese Webseite minet keine Coins. Ein iPhone kann kein wirtschaftliches Bitcoin-Mining betreiben und Safari darf nicht als dauerhafter Miner laufen.</p>
+ <div class="stats" style="margin:14px 0">
+  <div class="stat"><span>Mining-Status</span><b style="font-size:15px;color:#ffca67">Inaktiv</b></div>
+  <div class="stat"><span>Hashrate</span><b>0 H/s</b></div>
+  <div class="stat"><span>Verdient</span><b>0 €</b></div>
+ </div>
+ <div class="panel" style="margin:12px 0;padding:13px;background:#080e1c">
+  <h3 style="font-size:15px;margin:0 0 8px">Kosten- und Gewinnrechner</h3>
+  <p class="tiny">Trage Werte aus einem echten Miner- oder Pool-Dashboard ein. Ohne echte Hashrate und Ertragsdaten wird kein Gewinn erfunden.</p>
+  <div class="row">
+   <div class="grow"><label>Stromverbrauch (Watt)</label><input id="mineWatts" type="number" min="0" step="1" value="0" inputmode="decimal"></div>
+   <div class="grow"><label>Strompreis (€/kWh)</label><input id="minePowerPrice" type="number" min="0" step="0.01" value="0.35" inputmode="decimal"></div>
+  </div>
+  <div style="height:10px"></div>
+  <label>Erwartete Brutto-Einnahmen pro Tag (€)</label>
+  <input id="mineRevenue" type="number" min="0" step="0.01" value="0" inputmode="decimal">
+  <div class="row" style="margin-top:12px"><button class="primary grow" onclick="calcMining()">Kosten berechnen</button><button class="secondary" onclick="resetMining()">Zurücksetzen</button></div>
+  <div class="stats" style="margin-top:12px">
+   <div class="stat"><span>Stromkosten / Tag</span><b id="mineCost">0,00 €</b></div>
+   <div class="stat"><span>Netto / Tag</span><b id="mineNet">0,00 €</b></div>
+   <div class="stat"><span>Netto / Monat</span><b id="mineMonth">0,00 €</b></div>
+  </div>
+  <div class="status" id="mineStatus">Beispielwerte sind keine Gewinnprognose.</div>
+ </div>
+ <div class="panel" style="margin:12px 0;padding:13px;background:#080e1c">
+  <h3 style="font-size:15px;margin:0 0 8px">Bitcoin-Auszahlungswallet</h3>
+  <p class="tiny">Hier kannst du deine öffentliche Blockstream-BTC-Empfangsadresse hinterlegen. Die Adresse wird nur in diesem Browser gespeichert und noch nicht an einen Mining-Pool übertragen.</p>
+  <label>BTC-Empfangsadresse (beginnt meist mit bc1)</label>
+  <input id="mineWallet" type="text" placeholder="Deine öffentliche BTC-Adresse einfügen" autocomplete="off" autocapitalize="off" spellcheck="false">
+  <div class="row" style="margin-top:12px">
+   <button class="primary grow" onclick="saveMiningWallet()">Adresse prüfen & speichern</button>
+   <button class="secondary" onclick="clearMiningWallet()">Löschen</button>
+  </div>
+  <div class="status" id="walletStatus">Noch keine Auszahlungsadresse hinterlegt.</div>
+ </div>
+ <div class="note">
+  <strong>Realistischer Start mit 0 €:</strong><br>
+  1. Nutze den Rechner kostenlos und lerne, wie Stromkosten den Ertrag beeinflussen.<br>
+  2. Verbinde später nur einen echten Miner oder einen seriösen Pool, wenn du passende Hardware besitzt.<br>
+  3. Prüfe Auszahlungen direkt beim Pool und in der Blockchain.<br><br>
+  <strong>Sicherheit:</strong> Zahle niemals Gebühren, um angeblich kostenlose Mining-Auszahlungen freizuschalten. Gib niemals Seed-Phrase oder Private Key ein. Cloud-Mining-Angebote mit garantierten Gewinnen sind ein Warnsignal.
+ </div>
+</section>
+
 <div class="panel">
  <div class="row" style="justify-content:space-between"><h2 style="font-size:17px;margin:0">Scan-Ergebnisse</h2><button class="secondary" onclick="clearResults()">Löschen</button></div>
  <div id="results" class="note" style="margin-top:10px">Noch keine Ergebnisse.</div>
@@ -53,7 +103,26 @@ button{border:0;border-radius:12px;padding:13px 17px;font-weight:800;font-size:1
 <script>
 const $=id=>document.getElementById(id);
 let running=false, checked=0, funded=0, results=[], totalNative={BTC:0,ETH:0,BNB:0,SOL:0,XRP:0};
-function showTab(which){$('manual').classList.toggle('hide',which!=='manual');$('auto').classList.toggle('hide',which!=='auto');$('tabManual').classList.toggle('active',which==='manual');$('tabAuto').classList.toggle('active',which==='auto')}
+function showTab(which){$('manual').classList.toggle('hide',which!=='manual');$('auto').classList.toggle('hide',which!=='auto');$('mining').classList.toggle('hide',which!=='mining');$('tabManual').classList.toggle('active',which==='manual');$('tabAuto').classList.toggle('active',which==='auto');$('tabMining').classList.toggle('active',which==='mining')}
+function eur(n){return n.toLocaleString('de-DE',{style:'currency',currency:'EUR'})}
+function calcMining(){let w=Math.max(0,Number($('mineWatts').value)||0),p=Math.max(0,Number($('minePowerPrice').value)||0),r=Math.max(0,Number($('mineRevenue').value)||0);let cost=(w/1000)*24*p,net=r-cost;$('mineCost').textContent=eur(cost);$('mineNet').textContent=eur(net);$('mineMonth').textContent=eur(net*30);$('mineNet').style.color=net>=0?'var(--green)':'#ff647c';$('mineStatus').textContent='Rechnergebnis auf Basis deiner Eingaben – keine Garantie und keine Live-Mining-Daten.'}
+function resetMining(){$('mineWatts').value=0;$('minePowerPrice').value=0.35;$('mineRevenue').value=0;calcMining()}
+function saveMiningWallet(){
+ const a=$('mineWallet').value.trim();
+ const ok=/^(bc1[ac-hj-np-z02-9]{11,87}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$/.test(a);
+ if(!ok){$('walletStatus').textContent='Bitte eine gültige öffentliche Bitcoin-Empfangsadresse einfügen.';return;}
+ try{localStorage.setItem('cryptosearch_btc_payout_address',a);}catch(e){}
+ $('walletStatus').textContent='BTC-Adresse lokal gespeichert. Noch kein Mining-Pool verbunden – es wurde keine Auszahlung eingerichtet.';
+}
+function clearMiningWallet(){
+ try{localStorage.removeItem('cryptosearch_btc_payout_address');}catch(e){}
+ $('mineWallet').value='';
+ $('walletStatus').textContent='Auszahlungsadresse aus diesem Browser entfernt.';
+}
+function loadMiningWallet(){
+ try{const a=localStorage.getItem('cryptosearch_btc_payout_address');if(a){$('mineWallet').value=a;$('walletStatus').textContent='Gespeicherte BTC-Adresse geladen. Noch kein Mining-Pool verbunden.';}}catch(e){}
+}
+
 function setStatus(s){$('status').textContent=s}
 function render(){ $('checked').textContent=checked; $('funded').textContent=funded; $('total').textContent='—'; $('results').innerHTML=results.length?results.slice().reverse().map(r=>`<div class="result"><div class="row" style="justify-content:space-between"><b>${esc(r.net)}</b><span class="amount">${esc(r.balance)} ${esc(r.net)}</span></div><div class="addr">${esc(r.address)}</div><div class="tiny">${esc(r.detail||'')}</div></div>`).join(''):'Noch keine Ergebnisse.'}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
@@ -73,4 +142,5 @@ async function discoverBlock(){let h=await (await fetch('https://blockstream.inf
 async function startAuto(){if(running)return;running=true;$('startBtn').disabled=true;$('stopBtn').disabled=false;showTab('auto');let rounds=0;while(running&&rounds<100){try{$('autoStatus').textContent='Lese neuesten Bitcoin-Block …';let list=await discoverBlock();$('autoStatus').textContent=`Block-Stichprobe: ${list.length} Adressen werden geprüft …`;for(let i=0;i<list.length&&running;i++){await checkOne('BTC',list[i]);$('autoStatus').textContent=`Prüfe Adresse ${i+1}/${list.length} · Runde ${rounds+1}`;await new Promise(r=>setTimeout(r,250))}rounds++;if(running)await new Promise(r=>setTimeout(r,15000))}catch(e){$('autoStatus').textContent='Scan-Fehler: '+e.message;await new Promise(r=>setTimeout(r,10000))}}running=false;$('startBtn').disabled=false;$('stopBtn').disabled=true;if(rounds>=100)$('autoStatus').textContent='Scan nach 100 Runden beendet.'}
 function stopAuto(){running=false;$('autoStatus').textContent='Stop angefordert …'}
 function clearResults(){results=[];checked=0;funded=0;render();setStatus('Ergebnisse gelöscht.')}
+calcMining();loadMiningWallet();
 </script></body></html>
